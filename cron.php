@@ -13,10 +13,10 @@ file_get_contents($req_uri);
 
 function checkNoteStatus($id) {
     global $oauth2;
-    if (!$file=file_get_contents($oauth2['api_base_url']."notes/".$id.".json"))
+    if (!$file=@file_get_contents($oauth2['api_base_url']."notes/".$id.".json"))
         return "404";
     $note=json_decode($file,true);
-    print_r($note);
+    return $note['properties']['status'];
 
 }
 
@@ -65,11 +65,10 @@ function reopenNote($id,$text) {
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
-print_r($oauth2);
-checkNoteStatus(83429);
+
 $tg_config=['tgr_user'=>rtrim(file_get_contents("/run/secrets/tgr_user")),'tgr_key'=>rtrim(file_get_contents("/run/secrets/tgr_api_token"))];
 $now=time();
-exit;
+
 $mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
 
 if (!file_exists("/usr/src/app/last_query"))
@@ -101,13 +100,20 @@ if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/
 }
 
 
-$today_query=$mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `date` = CURDATE() AND `user`=339078; ");
+$today_query=$mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `date` = CURDATE() AND `done`=0; ");
 $today_query->execute();
 $res_today=$today_query->get_result();
 if ($res_today->num_rows > 0) {
  while ($row=$res_today->fetch_assoc()) {
 
+    if ($row['user']=="339078")
     send_tg_msg("https://osm.org/note/".$row['note']);
+
+    $noteStatus=checkNoteStatus($row['note']);
+    if ($noteStatus == "open") 
+        commentNote($row['note'],"Here is your reminder as requested");
+    else if ($noteStatus == "closed")
+        reopenNote($row['note'],"Here is your reminder as requested");
     $update=$mysqli->prepare("UPDATE `reminder_bot` SET `done`= (?) WHERE `id`=(?)");
     $update->bind_param("ii",$now,$row['id']);
     $update->execute();
