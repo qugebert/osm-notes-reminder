@@ -64,8 +64,12 @@ function reopenNote($id,$text) {
 
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
+$oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
+print_r($oauth2);
+checkNoteStatus(83429);
 $tg_config=['tgr_user'=>rtrim(file_get_contents("/run/secrets/tgr_user")),'tgr_key'=>rtrim(file_get_contents("/run/secrets/tgr_api_token"))];
 $now=time();
+exit;
 $mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
 
 if (!file_exists("/usr/src/app/last_query"))
