@@ -47,7 +47,7 @@ if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/
 }
 
 
-$today_query=$mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `date` = CURDATE(); ");
+$today_query=$mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `date` = CURDATE() AND `user`=339078; ");
 $today_query->execute();
 $res_today=$today_query->get_result();
 if ($res_today->num_rows > 0) {
