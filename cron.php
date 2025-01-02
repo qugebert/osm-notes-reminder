@@ -15,7 +15,7 @@ if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/
         foreach ($note['properties']['comments'] as $comment_id => $comment) {
             preg_match("/\#remindme\ ([0-9\-]{10})/", $comment['text'], $matches);
             if (isset($matches[1])) {
-                $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `id` = (?) AND `note` = (?) ");
+                $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `note` = (?) AND `comment` = (?) ");
                 $queryExists->bind_param("ii", $note['properties']['id'], $comment_id);
                 $queryExists->execute();
                 $res = $queryExists->get_result();
