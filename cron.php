@@ -1,23 +1,35 @@
 <?php
 
-if(!file_exists("/usr/src/app/last_query"))
-    file_put_contents("/usr/src/app/last_query","0");
+$config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 
-$last=date("c",file_get_contents("/usr/src/app/last_query"));
+$mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
 
-if ($api=json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/notes/search.json?q=remindme&user=339078&from=".$last),true)) {
-    /*
+if (!file_exists("/usr/src/app/last_query"))
+    file_put_contents("/usr/src/app/last_query", "0");
+
+$last = date("c", file_get_contents("/usr/src/app/last_query"));
+
+if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/notes/search.json?q=remindme&user=339078&from=" . $last), true)) {
+
     foreach ($api['features'] as $note) {
-        $notes_id=$note['properties']['id'];
-        $closed=isset($note['properties']['closed_at'])?substr($note['properties']['closed_at'],0,-4):NULL;
-        
-        foreach ($note['properties']['comments'] as $comment) {
-            checkForImages($notes_id,$closed,$comment['text']);
+        foreach ($note['properties']['comments'] as $comment_id => $comment) {
+            preg_match("/\#remindme\ ([0-9\-]{10})/", $comment['text'], $matches);
+            if (isset($matches[1])) {
+                $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `id` = (?) AND `note` = (?) ");
+                $queryExists->bind_param("ii", $note['properties']['id'], $comment_id);
+                $queryExists->execute();
+                $res = $queryExists->get_result();
+                if ($res->num_rows == 0) {
+                    $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`, `done`) VALUES (NULL, (?), (?), (?), '0'); ");
+                    $insertquery->bind_param("iis", $note['properties']['id'], $comment_id, $matches[1]);
+                    $insertquery->execute();
+                }
+
+            }
         }
     }
 
-    */
-}
 
-file_put_contents("/usr/src/app/test",$api);
-?>
+
+    // file_put_contents("/usr/src/app/last_query",time());    
+}
