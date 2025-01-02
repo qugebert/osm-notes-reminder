@@ -11,8 +11,10 @@ $req_uri="https://api.telegram.org/bot".$tg_config['tgr_key']."/sendMessage?".ht
 file_get_contents($req_uri);
 }
 
+
+
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
-$tg_config=['tgr_user'=>file_get_contents("/run/secrets/tgr_user"),'tgr_key'=>file_get_contents("/run/secrets/tgr_api_token")];
+$tg_config=['tgr_user'=>rtrim(file_get_contents("/run/secrets/tgr_user")),'tgr_key'=>rtrim(file_get_contents("/run/secrets/tgr_api_token"))];
 $now=time();
 $mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
 
@@ -49,7 +51,7 @@ $today_query=$mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `date` = CURDA
 $today_query->execute();
 $res_today=$today_query->get_result();
 if ($res_today->num_rows > 0) {
- while ($row=$res->fetch_assoc()) {
+ while ($row=$res_today->fetch_assoc()) {
 
     send_tg_msg("https://osm.org/note/".$row['note']);
     $update=$mysqli->prepare("UPDATE `reminder_bot` SET `done`= (?) WHERE `id`=(?)");
