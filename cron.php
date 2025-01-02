@@ -20,8 +20,8 @@ if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/
                 $queryExists->execute();
                 $res = $queryExists->get_result();
                 if ($res->num_rows == 0) {
-                    $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`, `done`) VALUES (NULL, (?), (?), (?), '0'); ");
-                    $insertquery->bind_param("iis", $note['properties']['id'], $comment_id, $matches[1]);
+                    $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`,`user`, `done`) VALUES (NULL, (?), (?), (?), (?), '0'); ");
+                    $insertquery->bind_param("iisi", $note['properties']['id'], $comment_id, $matches[1],$comment['uid']);
                     $insertquery->execute();
                 }
 
