@@ -96,7 +96,7 @@ if ($api = json_decode(file_get_contents("https://api.openstreetmap.org/api/0.6/
         }
     }
 
-    // file_put_contents("/usr/src/app/last_query",time());    
+    file_put_contents("/usr/src/app/last_query",time());    
 }
 
 
