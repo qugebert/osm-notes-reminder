@@ -11,4 +11,4 @@ RUN touch /var/log/cron.log
 COPY . /usr/src/app
 
 WORKDIR /usr/src/app
-CMD echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" >> /etc/cron.d/cron && cron && tail -f /dev/null
+CMD echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cron && cron && tail -f /dev/null
