@@ -1,67 +1,7 @@
 <?php
 
-function send_tg_msg($txt)
-{  
-global $tg_config;
-$params=[
-'chat_id'=>$tg_config['tgr_user'],
-'text'=> $txt
-];
-$req_uri="https://api.telegram.org/bot".$tg_config['tgr_key']."/sendMessage?".http_build_query($params);
-file_get_contents($req_uri);
-}
-
-function checkNoteStatus($id) {
-    global $oauth2;
-    if (!$file=@file_get_contents($oauth2['api_base_url']."notes/".$id.".json"))
-        return "404";
-    $note=json_decode($file,true);
-    return $note['properties']['status'];
-
-}
-
-function commentNote($id,$text) {
-    global $oauth2;
-
-    $cl = curl_init();
-    curl_setopt($cl, CURLOPT_URL, $oauth2['api_base_url'] . "notes/".$id."/comment");
-    $headers = [
-        'Authorization: Bearer ' . $oauth2['bearer']
-    ];
-
-    curl_setopt($cl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($cl, CURLOPT_RETURNTRANSFER, true);    
-    curl_setopt($cl, CURLOPT_POST, true);
-    curl_setopt($cl, CURLOPT_POSTFIELDS, http_build_query([
-        "text" => $text, 
-    ]));
-    $result=curl_exec($cl);
-    curl_close($cl);
-    //return is_numeric($changeset_id) ? $changeset_id : false;
-
-}
-
-function reopenNote($id,$text) {
-    global $oauth2;
-
-    $cl = curl_init();
-    curl_setopt($cl, CURLOPT_URL, $oauth2['api_base_url'] . "notes/".$id."/reopen");
-    $headers = [
-        'Authorization: Bearer ' . $oauth2['bearer']
-    ];
-
-    curl_setopt($cl, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($cl, CURLOPT_RETURNTRANSFER, true);    
-    curl_setopt($cl, CURLOPT_POST, true);
-    curl_setopt($cl, CURLOPT_POSTFIELDS, http_build_query([
-        "text" => $text, 
-    ]));
-    $result=curl_exec($cl);
-    curl_close($cl);
-    //return is_numeric($changeset_id) ? $changeset_id : false;
-
-}
-
+include "includes/functions_telegram.php";
+include "includes/functions_notes.php";
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
