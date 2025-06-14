@@ -1,3 +1,4 @@
+<?php
 
 function checkNoteStatus($id) {
     global $oauth2;
