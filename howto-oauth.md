@@ -34,5 +34,3 @@ urn:ietf:wg:oauth:2.0:oob
      -d "client_secret=DEIN_CLIENT_SECRET" \
      -d "redirect_uri=urn:ietf:wg:oauth:2.0:oob"
    ```
-
-Der Platzhalter `urn:ietf:wg:oauth:2.0:oob` sollte dein Problem lösen.
