@@ -8,7 +8,7 @@ USER=$(echo "$CONFIG" | jq -r .user)
 PASS=$(echo "$CONFIG" | jq -r .pass)
 DB=$(echo "$CONFIG" | jq -r .db)
 
-mysql -h "$HOST" -u "$USER" -p"$PASS" "$DB" < /usr/src/app/init.sql
+mysql -h "$HOST" -u "$USER" -p"$PASS" "$DB" < /usr/src/app/db_scheme.sql
 
 echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cron
 cron
