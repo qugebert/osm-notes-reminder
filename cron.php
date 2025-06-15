@@ -1,12 +1,10 @@
 <?php
 
-include "includes/functions_telegram.php";
 include "includes/functions_notes.php";
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
 
-$tg_config=['tgr_user'=>rtrim(file_get_contents("/run/secrets/tgr_user")),'tgr_key'=>rtrim(file_get_contents("/run/secrets/tgr_api_token"))];
 $now=time();
 
 $mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
@@ -46,9 +44,6 @@ $today_query->execute();
 $res_today=$today_query->get_result();
 if ($res_today->num_rows > 0) {
  while ($row=$res_today->fetch_assoc()) {
-
-    if ($row['user']=="339078")
-    send_tg_msg("https://osm.org/note/".$row['note']);
 
     $noteStatus=checkNoteStatus($row['note']);
     if ($noteStatus == "open") 
