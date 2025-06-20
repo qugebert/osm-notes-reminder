@@ -5,7 +5,10 @@ function get_note_for_list($id) {
 global $oauth2;
 
     $result=json_decode(file_get_contents($oauth2['api_base_url'] . "notes/".$id.".json"),true);
-    $nomin=json_decode(file_get_contents("https://nominatim-de.qugeb.de/reverse?lat=".$result['geometry']['coordinates'][1]."&lon=".$result['geometry']['coordinates'][0]."&format=json"),true);
+    $nomin=json_decode(file_get_contents("https://nominatim.openstreetmap.org/reverse?lat=".$result['geometry']['coordinates'][1]."&lon=".$result['geometry']['coordinates'][0]."&format=json"),true);
+     if (isset($nomin['error']))
+        $nomin['display_name']=$nomin['error'];
+    
     return ["url"=>"[Hinweis ".$id."](https://osm.org/note/".$id.")","nearby"=> $nomin['display_name']];
 }
 
