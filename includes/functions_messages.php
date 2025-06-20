@@ -140,7 +140,7 @@ function send_list($user, $msg)
     $res = getOpenNotesByUser($user);
     if ($res->num_rows > 0) {
 
-        $str = "| Datum | Hinweis | Ort |
+        $str = "| Datum | Hinweis | In der Nähe von ... |
 |:--------|:-------:|-------:|\n";
         while ($row = $res->fetch_assoc()) {
             $detail = get_note_for_list($row['note']);
