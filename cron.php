@@ -1,6 +1,8 @@
 <?php
 
 include "includes/functions_notes.php";
+include "includes/functions_db.php";
+include "includes/functions_messages.php";
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
