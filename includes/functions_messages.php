@@ -144,7 +144,7 @@ function send_list($user, $msg)
 |:--------|:-------:|-------:|\n";
         while ($row = $res->fetch_assoc()) {
             $detail = get_note_for_list($row['note']);
-            $str .= "|  " . $row['date'] . "   | [Hinweis " . $detail['url'] . " | " . $detail['nearby'] . "   |\n";
+            $str .= "|  " . $row['date'] . "   | " . $detail['url'] . " | " . $detail['nearby'] . "   |\n";
         }
 
         send_message($msg['from_display_name'], "Re: LIST", $str);
