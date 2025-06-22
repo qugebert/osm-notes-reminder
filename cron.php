@@ -32,13 +32,12 @@ if ($api = json_decode(file_get_contents($api_url), true)) {
 $res_today=getTodaysReminder();
 if ($res_today->num_rows > 0) {
  while ($row=$res_today->fetch_assoc()) {
-
     $noteStatus=checkNoteStatus($row['note']);
     if ($noteStatus == "open") 
         commentNote($row['note'],"Here is your reminder as requested");
     else if ($noteStatus == "closed")
         reopenNote($row['note'],"Here is your reminder as requested");
-    checkReminder($id);
+    checkReminder($row['id']);
  }    
 }
 
