@@ -41,3 +41,57 @@ function insertReminder($note_id, $comment_id, $date, $user_id)
     }
 
 }
+
+function getNoteLocation($note_id) {
+    global $mysqli;
+    $queryLocation = $mysqli->prepare("SELECT * FROM `note_location` WHERE `note` = (?);");
+    $queryLocation->bind_param("i", $note_id);
+    $queryLocation->execute();
+    $res = $queryLocation->get_result();
+    if ($res -> num_rows == 0) {
+        return false;
+    }
+    return $res->fetch_assoc();
+
+}
+
+function insertNoteLocation($note_id,$lat,$lon) {
+    global $mysqli;
+    
+    $nominatim = callNominatim($lat,$lon);
+    if (!$nominatim) 
+        return false;
+    $address=$nominatim['address'] ?? [];
+    $insertParams = [
+    $note_id,
+    $lat,
+    $lon,
+    $nominatim['display_name'] ?? null,
+    $address['country'] ?? null,
+    $address['country_code'] ?? null,
+    $address['state'] ?? null,
+    $address['region'] ?? null,
+    $address['county'] ?? null,
+    $address['city'] ?? null,
+    $address['town'] ?? null,
+    $address['village'] ?? null,
+    $address['suburb'] ?? null,
+    $address['postcode'] ?? null,
+    json_encode($nominatim)
+];
+    $insertQuery=$mysqli->prepare("INSERT INTO `note_location` (`note`, `lat`, `lon`, `display_name`, `country`, `country_code`, `state`, `region`, `county`,
+     `city`, `town`, `village`, `suburb`, `postcode`, `address_json`) 
+     VALUES 
+     ((?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?));");
+     $insertQuery->bind_param("iddssssssssssss",...$insertParams);
+
+    $queryLocation = $mysqli->prepare("SELECT * FROM `note_location` WHERE `note` = (?);");
+    $queryLocation->bind_param("i", $note_id);
+    $queryLocation->execute();
+    $res = $queryLocation->get_result();
+    if ($res -> num_rows == 0) {
+        return false;
+    }
+    return $res->fetch_assoc();
+
+}
