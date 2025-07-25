@@ -5,7 +5,7 @@ RUN docker-php-ext-install mysqli
 RUN apt-get -y install cron   
 RUN apt-get -y install nano 
 RUN apt-get -y install default-mysql-client jq
-RUN apt-get -y supervisor
+RUN apt-get -y install supervisor
 
 
 #Angeblich geht das erst wenn man zur Laufzeit die Datei ändert.
