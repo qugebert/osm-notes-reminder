@@ -11,6 +11,6 @@ DB=$(echo "$CONFIG" | jq -r .db)
 mysql -h "$HOST" -u "$USER" -p"$PASS" "$DB" < /usr/src/app/db_scheme.sql
 
 echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cron
-cron
+chmod 0644 /etc/cron.d/cron
 
-tail -f /var/log/cron.log
+exec supervisord -c /usr/src/app/supervisord.conf
