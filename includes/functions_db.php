@@ -84,6 +84,7 @@ function insertNoteLocation($note_id,$lat,$lon) {
      VALUES 
      ((?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?), (?));");
      $insertQuery->bind_param("iddssssssssssss",...$insertParams);
+     $insertQuery->execute();
 
     $queryLocation = $mysqli->prepare("SELECT * FROM `note_location` WHERE `note` = (?);");
     $queryLocation->bind_param("i", $note_id);

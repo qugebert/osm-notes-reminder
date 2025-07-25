@@ -6,7 +6,7 @@ global $oauth2;
 
     $result=json_decode(file_get_contents($oauth2['api_base_url'] . "notes/".$id.".json"),true);
     $location=getNoteLocation($id);
-    if ($location == false || isset($location['error']))
+    if (!is_array($location))
         $location['display_name']="Unable to geocode location";
     
     return ["url"=>"[Hinweis ".$id."](https://osm.org/note/".$id.")","nearby"=> $location['display_name']];
