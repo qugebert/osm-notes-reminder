@@ -3,6 +3,7 @@
 include "includes/functions_notes.php";
 include "includes/functions_db.php";
 include "includes/functions_messages.php";
+include "includes/functions_nominatim.php";
 include "includes/request_header.php";
 
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
