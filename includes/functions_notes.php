@@ -18,6 +18,15 @@ function checkNoteStatus($id) {
     if (!$file=@file_get_contents($oauth2['api_base_url']."notes/".$id.".json"))
         return "404";
     $note=json_decode($file,true);
+
+    //Zur Sicherheit prüfen, ob heute schon erinnert, damit es parallel laufen kann.
+    foreach ($note['properties']['comments'] as $comment) {
+        if ($comment['uid'] == $oauth2['osm-user-id']) {
+           $isToday = (new DateTime($comment['date']))->format('Y-m-d') === (new DateTime('now', new DateTimeZone('UTC')))->format('Y-m-d');
+            if ($isToday && in_array($comment['action'] ?? '',["commented","reopened"]))
+                return "reminded";
+        }
+    }
     return $note['properties']['status'];
 
 }
