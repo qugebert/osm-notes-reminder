@@ -14,4 +14,5 @@ echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cro
 echo "0 6 1 * * root /usr/local/bin/php /usr/src/app/stats.php" > /etc/cron.d/cron
 chmod 0644 /etc/cron.d/cron
 
+php /usr/src/app/stats.php
 exec supervisord -c /usr/src/app/supervisord.conf
