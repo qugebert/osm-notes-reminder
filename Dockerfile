@@ -10,7 +10,7 @@ RUN apt-get -y install supervisor
 
 #Angeblich geht das erst wenn man zur Laufzeit die Datei ändert.
 RUN touch /var/log/cron.log
-COPY . /usr/src/app
+COPY --chown=www-data:www-data . /usr/src/app
 WORKDIR /usr/src/app
 
 RUN chmod +x /usr/src/app/entrypoint.sh
