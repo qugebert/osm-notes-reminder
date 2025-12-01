@@ -21,7 +21,7 @@ if ($api = json_decode(file_get_contents($api_url, false, $context), true)) {
 
     foreach ($api['features'] as $note) {
         foreach ($note['properties']['comments'] as $comment_id => $comment) {
-            preg_match("/\#remindme\ ([0-9\-]{10})/", $comment['text'], $matches);
+            preg_match("/\#remindme[: ]([0-9\-]{10})/", $comment['text'], $matches);
             if (isset($matches[1]) && strtotime($matches[1]) && strtotime($matches[1]) > time() ) {
                 if (!getNoteLocation($note['properties']['id'])) { //Kein Eintrag in der Datenbank
                     insertNoteLocation($note['properties']['id'],$note['geometry']['coordinates'][1],$note['geometry']['coordinates'][0]); //Von Nominatim holen und cachen
