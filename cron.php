@@ -9,7 +9,19 @@ include "includes/request_header.php";
 $config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true);
 
-$mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
+$mysqli = mysqli_init();
+mysqli_options($mysqli, MYSQLI_OPT_SSL_VERIFY_SERVER_CERT, false);
+mysqli_options($mysqli, MYSQLI_OPT_SSL, false);
+
+$mysqli->real_connect(
+    $config['host'],
+    $config['user'],
+    $config['pass'],
+    $config['db'],
+    null,
+    null,
+    0
+);
 
 if (!file_exists("/usr/src/app/last_query"))
     file_put_contents("/usr/src/app/last_query", "0");
