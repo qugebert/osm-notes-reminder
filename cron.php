@@ -26,6 +26,7 @@ if ($api = json_decode(file_get_contents($api_url, false, $context), true)) {
                 if (!getNoteLocation($note['properties']['id'])) { //Kein Eintrag in der Datenbank
                     insertNoteLocation($note['properties']['id'],$note['geometry']['coordinates'][1],$note['geometry']['coordinates'][0]); //Von Nominatim holen und cachen
                 }
+                $comment['uid'] = $comment['uid'] ?? 0;
                 insertReminder($note['properties']['id'],$comment_id,$matches[1],$comment['uid']);
             }
         }
