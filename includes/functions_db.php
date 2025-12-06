@@ -30,8 +30,8 @@ function checkReminder($id)
 function insertReminder($note_id, $comment_id, $date, $user_id)
 {
     global $mysqli;
-    $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `note` = (?) AND `comment` = (?) ");
-    $queryExists->bind_param("ii", $note_id, $comment_id);
+    $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `note` = (?) AND `date` = (?) ");
+    $queryExists->bind_param("ii", $note_id, $date);
     $queryExists->execute();
     $res = $queryExists->get_result();
     if ($res->num_rows == 0) {
