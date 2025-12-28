@@ -27,17 +27,25 @@ function checkReminder($id)
     $update->execute();
 }
 
-function insertReminder($note_id, $comment_id, $date, $user_id)
+function insertReminder($note_id, $comment_id, $date, $user_id, $action="remindme")
 {
     global $mysqli;
-    $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `note` = (?) AND `date` = (?) ");
+    $queryExists = $mysqli->prepare("SELECT * FROM `reminder_bot` WHERE `note` = (?) AND `date` = (?) AND `done` != 0 ");
     $queryExists->bind_param("is", $note_id, $date);
     $queryExists->execute();
     $res = $queryExists->get_result();
     if ($res->num_rows == 0) {
-        $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`,`user`, `done`) VALUES (NULL, (?), (?), (?), (?), '0'); ");
-        $insertquery->bind_param("iisi", $note_id, $comment_id, $date, $user_id);
+        $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`,`user`, `done`, `action`) VALUES (NULL, (?), (?), (?), (?), '0', (?)); ");
+        $insertquery->bind_param("iisis", $note_id, $comment_id, $date, $user_id, $action);
         $insertquery->execute();
+    } else {
+        $row=$res->fetch_assoc();
+        if ($action == "remindme" && $row['action'] == "softremindme") {
+            check_reminder($row['id']);
+            $insertquery = $mysqli->prepare("INSERT INTO `reminder_bot` (`id`, `note`, `comment`, `date`,`user`, `done`, `action`) VALUES (NULL, (?), (?), (?), (?), '0', (?)); ");
+            $insertquery->bind_param("iisis", $note_id, $comment_id, $date, $user_id, $action);
+            $insertquery->execute();
+        }
     }
 
 }
