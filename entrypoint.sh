@@ -10,7 +10,7 @@ DB=$(echo "$CONFIG" | jq -r .db)
 
 # mysql -h "$HOST" -u "$USER" -p"$PASS" "$DB" < /usr/src/app/db_scheme.sql
 
-echo "0 * * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cron
+echo "0 3 * * * root /usr/local/bin/php /usr/src/app/cron.php" > /etc/cron.d/cron
 echo "0 6 1 * * root /usr/local/bin/php /usr/src/app/stats.php" >> /etc/cron.d/cron
 chmod 0644 /etc/cron.d/cron
 
