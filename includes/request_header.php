@@ -1,5 +1,5 @@
 <?php
-$user_agent=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true)['User-Agent']??'NotesReminderBot/1.0';
+$user_agent=json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"),true)['User-Agent']??'NotesReminderBot/1.1';
 
     $options = [
         "http" => [
