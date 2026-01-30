@@ -7,9 +7,6 @@ RUN apt-get -y install nano
 RUN apt-get -y install default-mysql-client jq
 RUN apt-get -y install supervisor
 
-
-#Angeblich geht das erst wenn man zur Laufzeit die Datei ändert.
-RUN touch /var/log/cron.log
 COPY --chown=www-data:www-data . /usr/src/app
 WORKDIR /usr/src/app
 
