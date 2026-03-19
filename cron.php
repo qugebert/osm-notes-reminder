@@ -5,6 +5,7 @@ include "includes/functions_db.php";
 include "includes/functions_messages.php";
 include "includes/functions_nominatim.php";
 include "includes/request_header.php";
+include "includes/lang.php";
 
 $keepClosed = ["softremindme"];
 $reminderText = "Here is your reminder as requested";
@@ -21,6 +22,9 @@ $res_today = getTodaysReminder();
 if ($res_today->num_rows > 0) {
     while ($row = $res_today->fetch_assoc()) {
         $noteStatus = checkNoteStatus($row['note']);
+        $noteLocation = getNoteLocation($row['note']);
+        if(isset($noteLocation['country_code']) && isset($comment_text[$noteLocation['country_code']])) //TODO: Wenn ich auf postgis umstelle, sieht das Format anders aus.
+            $reminderText = $comment_text[$noteLocation['country_code']];
         if ($noteStatus == "open")
             commentNote($row['note'], $reminderText);
         else if ($noteStatus == "closed" && !in_array($row['action'], $keepClosed))
