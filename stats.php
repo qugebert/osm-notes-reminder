@@ -1,59 +1,60 @@
 <?php
-$config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
-$mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
+$config = json_decode(rtrim(file_get_contents("/run/secrets/postgis_config_notes")), true);
+$dsn = "pgsql:host={$config['host']};port=5432;dbname={$config['db']}";
+$pdo = new PDO($dsn, $config['user'], $config['pass'], [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+]);
 
-$file="/var/stats/".date(format: "Y-m-d").".md";
-$md="";
+$file = "/var/stats/" . date("Y-m-d") . ".md";
+$md = "";
 
-function kramdown_table($result, $headers) {
-    $output = "| " . implode(" | ", $headers) . " |\n";    
+function kramdown_table($rows, $headers) {
+    $output = "| " . implode(" | ", $headers) . " |\n";
     $output .= "| " . str_repeat("--- | ", count($headers)) . "\n";
-    
-    while ($row = $result->fetch_assoc()) {
+    foreach ($rows as $row) {
         $output .= "| " . implode(" | ", $row) . " |\n";
     }
-    
     return $output;
 }
 
-
 // 1. Nutzer gesamt
-$total_users_query = "SELECT COUNT(DISTINCT user) AS total_users FROM reminder_bot";
-$total_users_result = $mysqli->query($total_users_query);
-$total_users = $total_users_result->fetch_assoc()['total_users'];
+$total_users = $pdo->query('SELECT COUNT(DISTINCT user_id) AS total_users FROM bot.reminder_bot')
+    ->fetch()['total_users'];
 
-// 2. Verarbeitete Notes (done != 0)
-$processed_notes_query = "SELECT COUNT(*) AS processed_notes FROM reminder_bot WHERE done != 0";
-$processed_notes_result = $mysqli->query($processed_notes_query);
-$processed_notes = $processed_notes_result->fetch_assoc()['processed_notes'];
+// 2. Erledigte Erinnerungen (done IS NOT NULL)
+$processed_notes = $pdo->query('SELECT COUNT(*) AS processed_notes FROM bot.reminder_bot WHERE done IS NOT NULL')
+    ->fetch()['processed_notes'];
 
-// 3. Offene Notes (done = 0)
-$open_notes_query = "SELECT COUNT(*) AS open_notes FROM reminder_bot WHERE done = 0";
-$open_notes_result = $mysqli->query($open_notes_query);
-$open_notes = $open_notes_result->fetch_assoc()['open_notes'];
+// 3. Offene Erinnerungen (done IS NULL)
+$open_notes = $pdo->query('SELECT COUNT(*) AS open_notes FROM bot.reminder_bot WHERE done IS NULL')
+    ->fetch()['open_notes'];
 
 // 4. Räumliche Verteilung - Länder
-$country_query = "SELECT country, COUNT(*) AS country_count FROM note_location GROUP BY country ORDER BY COUNT(*) DESC";
-$country_result = $mysqli->query($country_query);
+$country_rows = $pdo->query("
+    SELECT nominatim->>'country' AS country, COUNT(*) AS country_count
+    FROM bot.note_details
+    GROUP BY nominatim->>'country'
+    ORDER BY COUNT(*) DESC
+")->fetchAll();
 
 // 5. Räumliche Verteilung - Bundesländer in Deutschland
-$state_query = "SELECT state, COUNT(*) AS state_count FROM note_location WHERE country = 'Deutschland' GROUP BY state ORDER BY COUNT(*) DESC";
-$state_result = $mysqli->query($state_query);
+$state_rows = $pdo->query("
+    SELECT nominatim->>'state' AS state, COUNT(*) AS state_count
+    FROM bot.note_details
+    WHERE nominatim->>'country_code' = 'de'
+    GROUP BY nominatim->>'state'
+    ORDER BY COUNT(*) DESC
+")->fetchAll();
 
-
-
-$md.= "## Statistiken (Stand ".date("d.m.Y").")\n\n";
+$md .= "## Statistiken (Stand " . date("d.m.Y") . ")\n\n";
 $md .= "Nutzer: $total_users\n\n";
 $md .= "Erledigte Erinnerungen: $processed_notes\n\n";
 $md .= "Offene Erinnerungen: $open_notes\n\n";
-
 $md .= "### Räumliche Verteilung der Hinweise\n\n";
-
 $md .= "#### Länder\n\n";
-$md .= kramdown_table($country_result, ['Land', 'Anzahl']) . "\n";
-
+$md .= kramdown_table($country_rows, ['Land', 'Anzahl']) . "\n";
 $md .= "#### Deutschland\n\n";
-$md .= kramdown_table($state_result, ['Bundesland', 'Anzahl']) . "\n";
+$md .= kramdown_table($state_rows, ['Bundesland', 'Anzahl']) . "\n";
 
-file_put_contents($file,$md);
-?>
+file_put_contents($file, $md);

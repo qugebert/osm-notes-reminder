@@ -10,28 +10,30 @@ include "includes/lang.php";
 $keepClosed = ["softremindme"];
 $reminderText = "Here is your reminder as requested";
 
-$config = json_decode(rtrim(file_get_contents("/run/secrets/mysqli_config_notes")), true);
 $oauth2 = json_decode(file_get_contents("/run/secrets/oauth2_notes_reminder"), true);
 
-$mysqli = new mysqli($config['host'], $config['user'], $config['pass'], $config['db']);
+$config = json_decode(rtrim(file_get_contents("/run/secrets/postgis_config_notes")), true);
+$dsn = "pgsql:host={$config['host']};port=5432;dbname={$config['db']}";
+$pdo = new PDO($dsn, $config['user'], $config['pass'], [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+]);
 
 fetch_latest_notes("remindme");
 fetch_latest_notes("softremindme");
 
-$res_today = getTodaysReminder();
-if ($res_today->num_rows > 0) {
-    while ($row = $res_today->fetch_assoc()) {
-        $noteStatus = checkNoteStatus($row['note']);
-        $noteLocation = getNoteLocation($row['note']);
-        if(isset($noteLocation['country_code']) && isset($comment_text[$noteLocation['country_code']])) //TODO: Wenn ich auf postgis umstelle, sieht das Format anders aus.
-            $reminderText = $comment_text[$noteLocation['country_code']];
-        if ($noteStatus == "open")
-            commentNote($row['note'], $reminderText);
-        else if ($noteStatus == "closed" && !in_array($row['action'], $keepClosed))
-            reopenNote($row['note'], $reminderText);
-        checkReminder($row['id']);
-    }
+$rows_today = getTodaysReminder();
+foreach ($rows_today as $row) {
+    $noteStatus = checkNoteStatus($row['note']);
+    $details = getNoteDetails($row['note']);
+    $country_code = $details['nominatim']['address']['country_code'] ?? null;
+    if ($country_code && isset($comment_text[$country_code]))
+        $reminderText = $comment_text[$country_code];
+    if ($noteStatus == "open")
+        commentNote($row['note'], $reminderText);
+    else if ($noteStatus == "closed" && !in_array($row['action'], $keepClosed))
+        reopenNote($row['note'], $reminderText);
+    checkReminder($row['id']);
 }
 
 process_inbox();
-

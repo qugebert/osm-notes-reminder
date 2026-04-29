@@ -136,23 +136,18 @@ function process_inbox()
 
 function send_list($user, $msg)
 {
-
-    $res = getOpenNotesByUser($user);
-    if ($res->num_rows > 0) {
-
-        $str = "| Datum | Hinweis | In der Nähe von ... |
-|:--------|:-------:|-------:|\n";
-        while ($row = $res->fetch_assoc()) {
+    $rows = getOpenNotesByUser($user);
+    if (!empty($rows)) {
+        $str = "| Datum | Hinweis | In der Nähe von ... |\n";
+        $str .= "|:--------|:-------:|-------:|\n";
+        foreach ($rows as $row) {
             $detail = get_note_for_list($row['note']);
-            $str .= "|  " . $row['date'] . "   | " . $detail['url'] . " | " . $detail['nearby'] . "   |\n";
+            $str .= "| " . $row['reminder_date'] . " | " . $detail['url'] . " | " . $detail['nearby'] . " |\n";
         }
-
         send_message($msg['from_display_name'], "Re: LIST", $str);
-
+    } else {
+        send_message($msg['from_display_name'], "Re: LIST", "Für diesen Nutzer sind keine Erinnerungen vorgemerkt");
     }
-    else
-        send_message($msg['from_display_name'],"Re: LIST","Für diesen Nutzer sind keine Erinnerungen vorgemerkt");
-
     set_message_read($msg['id']);
     delete_message($msg['id']);
 }
