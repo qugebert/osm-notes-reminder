@@ -6,6 +6,8 @@ RUN apt-get -y install cron
 RUN apt-get -y install nano 
 RUN apt-get -y install default-mysql-client jq
 RUN apt-get -y install supervisor
+RUN apt-get -y install libpq-dev
+RUN docker-php-ext-install pdo pdo_pgsql
 
 COPY --chown=www-data:www-data . /usr/src/app
 WORKDIR /usr/src/app
