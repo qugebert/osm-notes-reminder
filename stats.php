@@ -30,20 +30,20 @@ $processed_notes = $pdo->query('SELECT COUNT(*) AS processed_notes FROM bot.remi
 $open_notes = $pdo->query('SELECT COUNT(*) AS open_notes FROM bot.reminder_bot WHERE done IS NULL')
     ->fetch()['open_notes'];
 
-// 4. Räumliche Verteilung - Länder
+    // 4. Räumliche Verteilung - Länder
 $country_rows = $pdo->query("
-    SELECT nominatim->>'country' AS country, COUNT(*) AS country_count
+    SELECT nominatim->'address'->>'country' AS country, COUNT(*) AS country_count
     FROM bot.note_details
-    GROUP BY nominatim->>'country'
+    GROUP BY nominatim->'address'->>'country'
     ORDER BY COUNT(*) DESC
 ")->fetchAll();
 
 // 5. Räumliche Verteilung - Bundesländer in Deutschland
 $state_rows = $pdo->query("
-    SELECT nominatim->>'state' AS state, COUNT(*) AS state_count
+    SELECT nominatim->'address'->>'state' AS state, COUNT(*) AS state_count
     FROM bot.note_details
-    WHERE nominatim->>'country_code' = 'de'
-    GROUP BY nominatim->>'state'
+    WHERE nominatim->'address'->>'country_code' = 'de'
+    GROUP BY nominatim->'address'->>'state'
     ORDER BY COUNT(*) DESC
 ")->fetchAll();
 
