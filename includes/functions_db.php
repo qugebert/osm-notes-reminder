@@ -95,8 +95,8 @@ function getNoteDetails($note_id)
     $row = $query->fetch();
     if (!$row) return false;
 
-    $row['nominatim'] = json_decode($row['nominatim'], true);
-    $row['data']      = json_decode($row['data'], true);
+    $row['nominatim'] = $row['nominatim'] ? json_decode($row['nominatim'], true) : null;
+    $row['data']      = $row['data']      ? json_decode($row['data'], true)      : null;
     return $row;
 }
 
